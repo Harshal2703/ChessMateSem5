@@ -38,7 +38,6 @@ export async function POST(req) {
                 }
                 const ack = await collection.updateOne(filter, updateDoc)
                 if (ack.acknowledged) {
-<<<<<<< HEAD:app/api/auth/verifyotp/route.js
                     const response = NextResponse.json({ message: 'Successfully Registered' }, { status: 200 })
                     response.cookies.set({
                         name: 'jwt_auth_token',
@@ -55,17 +54,6 @@ export async function POST(req) {
             }
         } else {
             return NextResponse.json({ reason: 'Invalid OTP', tryAgain: true }, { status: 400 })
-=======
-                    return NextResponse.json({ message: 'Email Verified , Registration Completed', token }, { status: 200 })
-                } else {
-                    return NextResponse.json({ reason: 'Invalid OTP or OTP Timeout , Try Again!' ,tryAgain:true}, { status: 400 })
-                }
-            } else {
-                return NextResponse.json({ reason: 'Invalid OTP or OTP Timeout , Try Again!',tryAgain:true }, { status: 400 })
-            }
-        } else {
-            return NextResponse.json({ reason: 'Invalid OTP',tryAgain:true}, { status: 400 })
->>>>>>> a74497a3aefb21d43ddc5d11e82a42f139dba69a:app/api/authentication/verify-otp/route.js
         }
     }
 }

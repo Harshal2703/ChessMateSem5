@@ -3,17 +3,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export const RegistrationComponent = () => {
+export const SignUpComponent = () => {
   const [email, setEmail] = useState(null);
   const [username, setUsername] = useState(null);
   const [password, setPassword] = useState(null);
   const [otp, setOtp] = useState(null);
   const [errMsg, setErrMsg] = useState(null);
   const [veriUI, setVeriUI] = useState(false);
+  const [waitForResponse, setWaitForResponse] = useState(false);
   const router = useRouter();
 
   const validateEmail = (unverifiedEmail) => {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(unverifiedEmail);
   };
   const verifyCredentials = async () => {
@@ -25,13 +26,15 @@ export const RegistrationComponent = () => {
       password &&
       password.length >= 5
     ) {
-      const res = await fetch("/api/authentication/registration", {
+      setWaitForResponse(true)
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, username, password }),
       });
+      setWaitForResponse(false)
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
         setVeriUI(true);
@@ -44,16 +47,17 @@ export const RegistrationComponent = () => {
   };
   const verifyOtp = async () => {
     if (email && validateEmail(email) && otp && otp.length === 7) {
-      const res = await fetch("/api/authentication/verify-otp", {
+      setWaitForResponse(true)
+      const res = await fetch("/api/auth/verifyotp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, username, password, otp }),
       });
+      setWaitForResponse(false)
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
-        localStorage.setItem("ChessMate-Sign-In-Token", data.token);
         router.push("/");
       } else {
         setErrMsg(data.reason);
@@ -122,12 +126,16 @@ export const RegistrationComponent = () => {
               />
             </div>
             <button
-              onClick={verifyCredentials}
+              onClick={() => {
+                !waitForResponse && verifyCredentials();
+              }}
               className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
             >
-              Next
+              {waitForResponse ? `Loading...` : `Next`}
             </button>
-      <Link className="mt-3 flex font-bold " href='/signin'>Already have an Account? Sign In</Link>
+            <Link className="mt-3 flex font-bold " href="/signin">
+              Already have an Account? Sign In
+            </Link>
             <span className="text-red-600 font-bold">{errMsg}</span>
           </div>
         </>
@@ -152,10 +160,12 @@ export const RegistrationComponent = () => {
               }}
             />
             <button
-              onClick={verifyOtp}
+              onClick={() => {
+                !waitForResponse && verifyOtp();
+              }}
               className="w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
             >
-              Verify
+              {waitForResponse ? `Loading...` : `Verify`}
             </button>
             <span className="text-red-600 font-bold">{errMsg}</span>
           </div>

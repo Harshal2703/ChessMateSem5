@@ -11,7 +11,7 @@ export const SignInComponent = () => {
   const [waitForResponse, setWaitForResponse] = useState(false);
   const router = useRouter();
   const validateEmail = (unverifiedEmail) => {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(unverifiedEmail);
   };
   const signinRequest = async () => {

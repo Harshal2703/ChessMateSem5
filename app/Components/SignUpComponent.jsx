@@ -11,6 +11,7 @@ export const SignUpComponent = () => {
   const [errMsg, setErrMsg] = useState(null);
   const [veriUI, setVeriUI] = useState(false);
   const [waitForResponse, setWaitForResponse] = useState(false);
+  const [tryAgain, setTryAgain] = useState(false);
   const router = useRouter();
 
   const validateEmail = (unverifiedEmail) => {
@@ -26,7 +27,7 @@ export const SignUpComponent = () => {
       password &&
       password.length >= 5
     ) {
-      setWaitForResponse(true)
+      setWaitForResponse(true);
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -34,9 +35,11 @@ export const SignUpComponent = () => {
         },
         body: JSON.stringify({ email, username, password }),
       });
-      setWaitForResponse(false)
+      setWaitForResponse(false);
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
+        setTryAgain(false);
+        setErrMsg(false);
         setVeriUI(true);
       } else {
         setErrMsg(data.reason);
@@ -47,19 +50,20 @@ export const SignUpComponent = () => {
   };
   const verifyOtp = async () => {
     if (email && validateEmail(email) && otp && otp.length === 7) {
-      setWaitForResponse(true)
-      const res = await fetch("/api/auth/verifyotp", {
+      setWaitForResponse(true);
+      const res = await fetch("/api/auth/signup/verifyotp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, username, password, otp }),
       });
-      setWaitForResponse(false)
+      setWaitForResponse(false);
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
         router.push("/");
       } else {
+        setTryAgain(data.tryAgain);
         setErrMsg(data.reason);
       }
     }
@@ -133,8 +137,9 @@ export const SignUpComponent = () => {
             >
               {waitForResponse ? `Loading...` : `Next`}
             </button>
-            <Link className="mt-3 flex font-bold " href="/signin">
-              Already have an Account? Sign In
+            <Link className="mt-3 flex" href="/signin">
+              Already have an Account?{" "}
+              <span className="font-bold ml-1 underline"> Sign In </span>
             </Link>
             <span className="text-red-600 font-bold">{errMsg}</span>
           </div>
@@ -167,6 +172,17 @@ export const SignUpComponent = () => {
             >
               {waitForResponse ? `Loading...` : `Verify`}
             </button>
+            {tryAgain && (
+              <button
+                onClick={() => {
+                  setVeriUI(false);
+                  setErrMsg(false);
+                }}
+                className="w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+              >
+                Try Again
+              </button>
+            )}
             <span className="text-red-600 font-bold">{errMsg}</span>
           </div>
         </>

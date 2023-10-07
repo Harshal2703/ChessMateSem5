@@ -82,9 +82,14 @@ export const SignInComponent = () => {
       >
         {waitForResponse ? `Loading...` : `Sign In`}
       </button>
+      <div className="flex justify-between">
       <Link className="flex mt-3 font-bold " href="/signup">
         Create Account
       </Link>
+      <Link className="flex mt-3 font-bold " href="/forgotpassword">
+        Forgot Password?
+      </Link>
+      </div>
       <span className="text-red-600 font-bold">{errMsg}</span>
     </>
   );

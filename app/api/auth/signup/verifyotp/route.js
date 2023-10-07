@@ -1,22 +1,21 @@
-import { mongoClient } from '../../dbaccess'
+import { mongoClient } from '../../../dbaccess'
 import { NextResponse } from 'next/server'
-// const jwt = require('jsonwebtoken');
-const jose = require('jose') // alt to jwt
-const validateEmail = (unverifiedEmail) => {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(unverifiedEmail)
-}
+const jose = require('jose') 
 
 
 export async function POST(req) {
     const data = await req.json()
+    const validateEmail = (unverifiedEmail) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return re.test(unverifiedEmail)
+    }
     if (data.email &&
         validateEmail(data.email) &&
         data.otp &&
         data.otp.length === 7) {
-        await mongoClient.connect()
-        const db = mongoClient.db('Authentication');
-        const collection = db.collection('UsersCredentials');
+            const db = mongoClient.db('Authentication');
+            const collection = db.collection('UsersCredentials');
+            await mongoClient.connect()
         const info = await collection.find({ email: data.email }).toArray()
         if (info.length !== 0 && info[0].verifiedEmail === false) {
             const currentTimeStamp = Date.now()

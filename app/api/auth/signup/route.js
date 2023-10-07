@@ -2,21 +2,22 @@ import { mongoClient } from '../../dbaccess'
 import { NextResponse } from 'next/server'
 import { transporter } from '../../mailops';
 
-const randomStr = (arr) => {
-    let ans = '';
-    for (let i = 7; i > 0; i--) {
-        ans +=
-            arr[(Math.floor(Math.random() * arr.length))];
-    }
-    return ans
-}
-
-const validateEmail = (unverifiedEmail) => {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(unverifiedEmail)
-}
 export async function POST(req) {
     const data = await req.json()
+    const generateRandomOtp = (arr) => {
+        let ans = '';
+        for (let i = 7; i > 0; i--) {
+            ans +=
+                arr[(Math.floor(Math.random() * arr.length))];
+        }
+        return ans
+    }
+    
+    const validateEmail = (unverifiedEmail) => {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return re.test(unverifiedEmail)
+    }
+
     if (
         data.email &&
         validateEmail(data.email) &&
@@ -44,7 +45,7 @@ export async function POST(req) {
                 })
             }
             const timestamp = Date.now()
-            const otp = randomStr(process.env.OTPCONFIG)
+            const otp = generateRandomOtp(process.env.OTPCONFIG)
             const mailOptions = {
                 from: process.env.OUTLOOK_ID,
                 to: data.email,

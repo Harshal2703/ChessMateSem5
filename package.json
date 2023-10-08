@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "chess.js": "^1.0.0-beta.6",
     "jose": "^4.15.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.1.0",
     "next": "latest",
     "nodemailer": "^6.9.5",
     "react": "latest",
+    "react-chessboard": "^4.2.1",
     "react-dom": "latest"
   },
   "devDependencies": {

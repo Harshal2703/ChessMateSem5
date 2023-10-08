@@ -78,7 +78,7 @@ export const SignUpComponent = () => {
             <div className="mb-4">
               <label
                 htmlFor="email"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-white text-sm font-medium mb-2"
               >
                 Email
               </label>
@@ -86,7 +86,7 @@ export const SignUpComponent = () => {
                 type="email"
                 id="email"
                 name="email"
-                className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+                className="w-full p-2 border rounded-md bg-transparent focus:outline-none focus:border-blue-500"
                 onChange={(event) => {
                   setEmail(event.target.value);
                   setErrMsg(null);
@@ -96,7 +96,7 @@ export const SignUpComponent = () => {
             <div className="mb-4">
               <label
                 htmlFor="username"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-white text-sm font-medium mb-2"
               >
                 Username
               </label>
@@ -104,7 +104,7 @@ export const SignUpComponent = () => {
                 type="text"
                 id="username"
                 name="username"
-                className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+                className="w-full p-2 border  bg-transparent rounded-md focus:outline-none focus:border-blue-500"
                 onChange={(event) => {
                   setUsername(event.target.value);
                   setErrMsg(null);
@@ -114,7 +114,7 @@ export const SignUpComponent = () => {
             <div className="mb-4">
               <label
                 htmlFor="password"
-                className="block text-gray-700 text-sm font-medium mb-2"
+                className="block text-white text-sm font-medium mb-2"
               >
                 Password
               </label>
@@ -122,7 +122,7 @@ export const SignUpComponent = () => {
                 type="password"
                 id="password"
                 name="password"
-                className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+                className="w-full p-2 border rounded-md  bg-transparent focus:outline-none focus:border-blue-500"
                 onChange={(event) => {
                   setPassword(event.target.value);
                   setErrMsg(null);
@@ -133,7 +133,7 @@ export const SignUpComponent = () => {
               onClick={() => {
                 !waitForResponse && verifyCredentials();
               }}
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none font-bold"
             >
               {waitForResponse ? `Loading...` : `Next`}
             </button>
@@ -150,7 +150,7 @@ export const SignUpComponent = () => {
           <div className="space-y-3">
             <label
               htmlFor="otp"
-              className="block text-gray-700 text-sm font-medium mb-2"
+              className="block text-white text-sm font-bold mb-2"
             >
               OTP
             </label>
@@ -158,7 +158,7 @@ export const SignUpComponent = () => {
               type="text"
               id="otp"
               name="otp"
-              className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+              className="w-full p-2 border bg-transparent rounded-md focus:outline-none focus:border-blue-500"
               onChange={(event) => {
                 setOtp(event.target.value);
                 setErrMsg(null);
@@ -168,7 +168,7 @@ export const SignUpComponent = () => {
               onClick={() => {
                 !waitForResponse && verifyOtp();
               }}
-              className="w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+              className="w-full bg-blue-700 text-white py-2 font-bold rounded-md hover:bg-blue-600 focus:outline-none"
             >
               {waitForResponse ? `Loading...` : `Verify`}
             </button>
@@ -178,7 +178,7 @@ export const SignUpComponent = () => {
                   setVeriUI(false);
                   setErrMsg(false);
                 }}
-                className="w-full bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+                className="w-full font-bold bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
               >
                 Try Again
               </button>

@@ -13,8 +13,8 @@ export async function POST(req) {
         validateEmail(data.email) &&
         data.otp &&
         data.otp.length === 7) {
-            const db = mongoClient.db('Authentication');
-            const collection = db.collection('UsersCredentials');
+            let db = mongoClient.db('Authentication');
+            let collection = db.collection('UsersCredentials');
             await mongoClient.connect()
         const info = await collection.find({ email: data.email }).toArray()
         if (info.length !== 0 && info[0].verifiedEmail === false) {
@@ -36,7 +36,15 @@ export async function POST(req) {
                     }
                 }
                 const ack = await collection.updateOne(filter, updateDoc)
-                if (ack.acknowledged) {
+                db = mongoClient.db('ChessMateMain');
+                collection = db.collection('Users');
+                const ack2 = await collection.insertOne({
+                    "email": data.email,
+                    "username": data.username,
+                    "rating" : 1000
+                })
+                if (ack.acknowledged && ack2.acknowledged) {
+                    mongoClient.close()
                     const response = NextResponse.json({ message: 'Successfully Registered' }, { status: 200 })
                     response.cookies.set({
                         name: 'jwt_auth_token',

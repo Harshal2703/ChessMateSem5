@@ -41,7 +41,7 @@ export const SignInComponent = () => {
       <div className="mb-4">
         <label
           htmlFor="email"
-          className="block text-gray-700 text-sm font-medium mb-2"
+          className="block text-white text-sm font-medium mb-2"
         >
           Email
         </label>
@@ -49,7 +49,7 @@ export const SignInComponent = () => {
           type="email"
           id="email"
           name="email"
-          className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full p-2 border rounded-md bg-transparent focus:outline-none focus:border-blue-500"
           onChange={(event) => {
             setEmail(event.target.value);
             setErrMsg(null);
@@ -59,7 +59,7 @@ export const SignInComponent = () => {
       <div className="mb-4">
         <label
           htmlFor="password"
-          className="block text-gray-700 text-sm font-medium mb-2"
+          className="block text-white text-sm font-medium mb-2"
         >
           Password
         </label>
@@ -67,7 +67,7 @@ export const SignInComponent = () => {
           type="password"
           id="password"
           name="password"
-          className="w-full p-2 border rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full p-2 border rounded-md bg-transparent  focus:outline-none focus:border-blue-500"
           onChange={(event) => {
             setPassword(event.target.value);
             setErrMsg(null);
@@ -78,7 +78,7 @@ export const SignInComponent = () => {
         onClick={() => {
           !waitForResponse && signinRequest();
         }}
-        className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+        className="w-full bg-blue-500 text-white font-bold py-2 rounded-md hover:bg-blue-600 focus:outline-none"
       >
         {waitForResponse ? `Loading...` : `Sign In`}
       </button>

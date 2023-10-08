@@ -19,12 +19,7 @@ export default function SignInPage() {
                         width={400}
                         height={130}
                         alt="Picture of the author" />
-                    <div className=" text-white p-8 rounded-2xl shadow-md w-96 " style={{
-                        WebkitBackdropFilter: 'blur(118px)',
-                        backdropFilter: 'blur(118px)',
-                        boxShadow: '0px 10px 15px 10px rgba(0, 0, 0, 0.15)',
-                        backgroundColor: 'rgba(250, 250, 250, 0.15)',
-                    }}>
+                    <div className=" text-white p-8 rounded-2xl w-96">
                         <SignInComponent />
                     </div>
                 </div>

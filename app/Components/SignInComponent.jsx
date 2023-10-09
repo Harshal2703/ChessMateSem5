@@ -78,7 +78,7 @@ export const SignInComponent = () => {
         onClick={() => {
           !waitForResponse && signinRequest();
         }}
-        className="w-full bg-blue-500 text-white font-bold py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+        className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 font-bold focus:outline-none"
       >
         {waitForResponse ? `Loading...` : `Sign In`}
       </button>

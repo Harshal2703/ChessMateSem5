@@ -49,6 +49,7 @@ export const ForgotPassword = () => {
       OTP &&
       OTP.length === 7
     ) {
+      setTryAgain(false)
       setWaitForResponse(true);
       const res = await fetch("/api/auth/forgotpassword/verifyotp", {
         method: "POST",
@@ -68,6 +69,7 @@ export const ForgotPassword = () => {
       }
     } else {
       setErrMsg("Invalid Credentials");
+      setTryAgain(true)
     }
   };
 
@@ -98,7 +100,7 @@ export const ForgotPassword = () => {
             onClick={() => {
               !waitForResponse && handleGetOtp();
             }}
-            className="w-full bg-blue-500 text-white font-bold py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+            className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 font-bold focus:outline-none"
           >
             {waitForResponse ? `Loading...` : `Get OTP`}
           </button>
@@ -153,13 +155,13 @@ export const ForgotPassword = () => {
             onClick={() => {
               !waitForResponse && handleVerifyOtp();
             }}
-            className="w-full bg-blue-700 font-bold text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+            className="w-full font-bold bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
           >
             {waitForResponse ? `Loading...` : `Verify`}
           </button>
           {tryAgain && <button
               onClick={() => {setUiChange(false);setErrMsg(false);}}
-              className="w-full bg-blue-700 text-white font-bold py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+              className="w-full font-bold bg-white text-black py-2 rounded-md hover:bg-slate-300  focus:outline-none"
             >
               Try Again
             </button>}

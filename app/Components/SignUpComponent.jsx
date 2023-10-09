@@ -66,6 +66,9 @@ export const SignUpComponent = () => {
         setTryAgain(data.tryAgain);
         setErrMsg(data.reason);
       }
+    }else{
+      setTryAgain(true)
+      setErrMsg('Invalid');
     }
   };
 
@@ -133,7 +136,7 @@ export const SignUpComponent = () => {
               onClick={() => {
                 !waitForResponse && verifyCredentials();
               }}
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none font-bold"
+              className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none font-bold"
             >
               {waitForResponse ? `Loading...` : `Next`}
             </button>
@@ -168,7 +171,7 @@ export const SignUpComponent = () => {
               onClick={() => {
                 !waitForResponse && verifyOtp();
               }}
-              className="w-full bg-blue-700 text-white py-2 font-bold rounded-md hover:bg-blue-600 focus:outline-none"
+              className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
             >
               {waitForResponse ? `Loading...` : `Verify`}
             </button>
@@ -178,7 +181,7 @@ export const SignUpComponent = () => {
                   setVeriUI(false);
                   setErrMsg(false);
                 }}
-                className="w-full font-bold bg-blue-700 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none"
+                className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
               >
                 Try Again
               </button>

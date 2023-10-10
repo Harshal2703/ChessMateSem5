@@ -171,7 +171,7 @@ export const SignUpComponent = () => {
               onClick={() => {
                 !waitForResponse && verifyOtp();
               }}
-              className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
+              className="w-full font-bold bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
             >
               {waitForResponse ? `Loading...` : `Verify`}
             </button>
@@ -181,7 +181,7 @@ export const SignUpComponent = () => {
                   setVeriUI(false);
                   setErrMsg(false);
                 }}
-                className="w-full bg-white text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
+                className="w-full bg-white font-bold text-black py-2 rounded-md hover:bg-slate-300 focus:outline-none"
               >
                 Try Again
               </button>

@@ -1,6 +1,6 @@
 import { mongoClient } from '../../../dbaccess'
 import { NextResponse } from 'next/server'
-const jose = require('jose') 
+const jose = require('jose')
 
 
 export async function POST(req) {
@@ -13,16 +13,15 @@ export async function POST(req) {
         validateEmail(data.email) &&
         data.otp &&
         data.otp.length === 7) {
-            let db = mongoClient.db('Authentication');
-            let collection = db.collection('UsersCredentials');
-            await mongoClient.connect()
+        let db = mongoClient.db('Authentication');
+        let collection = db.collection('UsersCredentials');
+        await mongoClient.connect()
         const info = await collection.find({ email: data.email }).toArray()
         if (info.length !== 0 && info[0].verifiedEmail === false) {
             const currentTimeStamp = Date.now()
             if (data.email === info[0].email && data.username === info[0].username && data.password === info[0].password && (info[0].otpGenTime <= currentTimeStamp <= info[0].otpExpiryTime) && data.otp === info[0].otp) {
-                // const token = jwt.sign({ email: data.email, password: data.password }, process.env.JWT_SECRET_KEY, { algorithm: 'HS256' })
                 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET_KEY)
-                const token = await new jose.SignJWT({ email: data.email, password: data.password })
+                const token = await new jose.SignJWT({ email: data.email, username: data.username, password: data.password })
                     .setProtectedHeader({ alg: 'HS256' })
                     .setIssuedAt()
                     .setExpirationTime('168h')
@@ -41,7 +40,15 @@ export async function POST(req) {
                 const ack2 = await collection.insertOne({
                     "email": data.email,
                     "username": data.username,
-                    "rating" : 1000
+                    "rating": 1000,
+                    "profilePicUrl": null,
+                    "requests-out":[],
+                    "requests-in":[],
+                    "messages-out":[],
+                    "messages-in":[],
+                    "friends":[],
+                    "games-history":[],
+                    "active-game":[],
                 })
                 if (ack.acknowledged && ack2.acknowledged) {
                     mongoClient.close()

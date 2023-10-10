@@ -1,13 +1,12 @@
 import { mongoClient } from '../../dbaccess'
 import { NextResponse } from 'next/server'
-// const jwt = require('jsonwebtoken');
-const jose = require('jose') // alt to jwt
+const jose = require('jose')
 
-const validateEmail = (unverifiedEmail) => {
-    var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(unverifiedEmail)
-}
 export async function POST(req) {
+    const validateEmail = (unverifiedEmail) => {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return re.test(unverifiedEmail)
+    }
     const data = await req.json()
     if (
         data.email &&
@@ -20,13 +19,13 @@ export async function POST(req) {
         await mongoClient.connect()
         const info = await collection.find({ email: data.email }).toArray()
         if (info.length !== 0 && info[0].email === data.email && info[0].password === data.password && info[0].verifiedEmail) {
-            // const token = jwt.sign({ email: data.email, password: data.password }, process.env.JWT_SECRET_KEY, { algorithm: 'HS256' })
             const secretKey = new TextEncoder().encode(process.env.JWT_SECRET_KEY)
-            const token = await new jose.SignJWT({ email: data.email, password: data.password })
+            const token = await new jose.SignJWT({ email: data.email, username: info[0].username, password: data.password })
                 .setProtectedHeader({ alg: 'HS256' })
                 .setIssuedAt()
                 .setExpirationTime('168h')
                 .sign(secretKey);
+            console.log('signin ',token)
             const filter = { email: data.email }
             const updateDoc = {
                 $set: {

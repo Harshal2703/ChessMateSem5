@@ -7,12 +7,15 @@ import { useRouter } from "next/navigation";
 import { Messages } from "./Messages";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Friends } from "./Friends";
 
 export const MainPageComp = () => {
   const [userDataFromServer, setUserDataFromServer] = useState(null);
   const [searchData, setSearchData] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [boardUi, setBoardUi] = useState(true);
+  const [friendUi, setFriendUi] = useState(false);
+  const [messagesUi, setMessagesUi] = useState(false);
   const [err, setErr] = useState(null);
   const router = useRouter();
 
@@ -31,7 +34,7 @@ export const MainPageComp = () => {
       .catch((err) => {
         router.redirect("/signin");
       });
-  }, [router]);
+  }, []);
 
   const handlePlayerSearch = async () => {
     if (searchData) {
@@ -119,22 +122,29 @@ export const MainPageComp = () => {
                   Play Online
                 </button>
                 <button
+                  onClick={() => {
+                    setBoardUi(false);
+                    setMessagesUi(false);
+                    setFriendUi(true);
+                  }}
                   type="button"
                   className="text-black bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-bold rounded-lg text-xl px-5 py-2.5 text-center mr-2 mb-2"
                 >
                   Play with Friend
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className="text-black bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-bold rounded-lg text-xl px-5 py-2.5 text-center mr-2 mb-2"
                 >
                   Play with Computer
-                </button>
+                </button> */}
               </div>
               <div id="dm2" className="flex flex-col">
                 <button
                   onClick={() => {
                     setBoardUi(false);
+                    setMessagesUi(true);
+                    setFriendUi(false);
                   }}
                   type="button"
                   className="text-black bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-bold rounded-lg text-xl px-5 py-2.5 text-center mr-2 mb-2"
@@ -163,15 +173,28 @@ export const MainPageComp = () => {
               </div>
             </div>
           </div>
-          <div id="center" className="w-[46%] min-h-screen mx-auto p-2">
+          <div id="center" className="w-[46%] min-h-screen mx-auto p-2 ">
             {boardUi && (
-              <Chessboard
-                id="Dummy Board"
-                position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 "
+              <div className="flex items-center h-full">
+                <Chessboard
+                  id="Dummy Board"
+                  position="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 "
+                />
+              </div>
+            )}
+            {messagesUi && (
+              <Messages
+                setBoardUi={setBoardUi}
+                setFriendUi={setFriendUi}
+                setMessagesUi={setMessagesUi}
               />
             )}
-            {!boardUi && (
-              <Messages data={userDataFromServer} setBoardUi={setBoardUi} />
+            {friendUi && (
+              <Friends
+                setBoardUi={setBoardUi}
+                setFriendUi={setFriendUi}
+                setMessagesUi={setMessagesUi}
+              />
             )}
           </div>
           <div id="right" className="w-[34%] p-2 ">
@@ -258,10 +281,21 @@ export const MainPageComp = () => {
             <div id="searchResults" className="max-h-[77vh] overflow-auto">
               {searchResult &&
                 searchResult.map((data) => {
-                  return <SearchResult key={data.username} toast={toast} info={data} />;
+                  return (
+                    <SearchResult
+                      key={data.username}
+                      toast={toast}
+                      info={data}
+                    />
+                  );
                 })}
             </div>
           </div>
+        </div>
+      )}
+      {!userDataFromServer && (
+        <div className="bg-black text-5xl flex items-center justify-center min-h-screen ">
+          <span>Loading...</span>
         </div>
       )}
     </>

@@ -25,7 +25,6 @@ export async function POST(req) {
                 .setIssuedAt()
                 .setExpirationTime('168h')
                 .sign(secretKey);
-            console.log('signin ',token)
             const filter = { email: data.email }
             const updateDoc = {
                 $set: {

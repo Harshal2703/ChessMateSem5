@@ -1,17 +1,42 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
-export const Messages = ({ data, setBoardUi }) => {
-  const [requestsIn, setRequestsIn] = useState(null);
+export const Messages = ({ setBoardUi, setFriendUi, setMessagesUi }) => {
+  const [friendRequests, setFriendRequests] = useState(null);
   useEffect(() => {
-    setRequestsIn(data["requests-in"]);
-  }, [data]);
+    fetch("/api/getInfo").then((res) => {
+      res.json().then(({ data }) => {
+        const temp = data.friends.filter((friend) => {
+          return friend.accepted === false;
+        });
+        setFriendRequests(temp);
+      });
+    });
+  }, []);
 
   const handleRefresh = async () => {
     const res = await fetch("/api/getInfo");
-    const data = (await res.json()).data
-    console.log(data)
-    setRequestsIn(data["requests-in"])
+    const dataRef = (await res.json()).data;
+    const temp = dataRef.friends.filter((friend) => {
+      return friend.accepted === false;
+    });
+    setFriendRequests(temp );
+  };
+
+  const handleAck = async (reqId, acc, rej) => {
+    const res = await fetch("/api/acceptRejectFriendRequests", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ reqId, acc, rej }),
+    });
+    const data = JSON.parse(JSON.stringify(await res.json()));
+    if (res.status === 200) {
+      toast("added successfully");
+      handleRefresh();
+    }
   };
 
   return (
@@ -30,6 +55,8 @@ export const Messages = ({ data, setBoardUi }) => {
             <button
               onClick={() => {
                 setBoardUi(true);
+                setFriendUi(false)
+                setMessagesUi(false)
               }}
               type="button"
               className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
@@ -40,23 +67,18 @@ export const Messages = ({ data, setBoardUi }) => {
         </div>
         <div id="body" className=" p-3 max-h-[86vh] overflow-auto">
           <h1>
-            {requestsIn &&
-              requestsIn.length === 0 &&
+            {friendRequests &&
+              friendRequests.length === 0 &&
               "Messages / Requests Appears here"}
           </h1>
-          {requestsIn &&
-            requestsIn.map((request) => {
+          {friendRequests &&
+            friendRequests.map((request) => {
               return (
                 <div
                   key={request.reqId}
                   className="flex justify-between bg-black bg-opacity-50 font-bold border border-red-100 text-white p-3 my-3"
                 >
                   <div className=" flex flex-col items-center space-x-2 space-y-3">
-                    <h1 className="text-xl">
-                      {request.reqType[0].toUpperCase() +
-                        request.reqType.slice(1) +
-                        " Request"}
-                    </h1>
                     <div className="flex items-center space-x-3 cursor-pointer">
                       <Image
                         className="rounded-full"
@@ -73,10 +95,20 @@ export const Messages = ({ data, setBoardUi }) => {
                     </div>
                   </div>
                   <div className=" text-white text-left font-bold space-x-4 flex items-center">
-                    <button className="bg-white text-black px-3 py-1 rounded-full">
+                    <button
+                      onClick={() => {
+                        handleAck(request.reqId, true, false);
+                      }}
+                      className="bg-white text-black px-3 py-1 rounded-full"
+                    >
                       Accept
                     </button>
-                    <button className="bg-white text-black px-3 py-1 rounded-full">
+                    <button
+                      onClick={() => {
+                        handleAck(request.reqId, false, true);
+                      }}
+                      className="bg-white text-black px-3 py-1 rounded-full"
+                    >
                       Reject
                     </button>
                   </div>

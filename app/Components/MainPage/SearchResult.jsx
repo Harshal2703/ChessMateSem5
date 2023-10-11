@@ -3,7 +3,7 @@ import { useState } from "react";
 
 export const SearchResult = ({ info, toast }) => {
   const addFriend = async () => {
-    const res = await fetch("/api/addFriend", {
+    const res = await fetch("/api/sendFriendRequests", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -13,7 +13,6 @@ export const SearchResult = ({ info, toast }) => {
     const data = JSON.parse(JSON.stringify(await res.json()));
     if (res.status === 200) {
       toast("request sent");
-      console.log(data);
     }else{
         toast('failed to send request , try Again!')
     }
@@ -30,7 +29,6 @@ export const SearchResult = ({ info, toast }) => {
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
         toast("request sent");
-        console.log(data);
       }else{
           toast(data.message)
       }

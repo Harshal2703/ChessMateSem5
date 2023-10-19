@@ -64,15 +64,20 @@ export const GamePageComp = () => {
     }
   };
 
+  async function writeGameData(gameId, updatePayload) {
+    const db = getDatabase();
+    await set(ref(db, "games/" + gameId), updatePayload);
+  }
+
   const sendChat = async () => {
-    const res = await fetch("/api/game/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ gameId, chat, whoIm }),
-    });
-    const data = JSON.parse(JSON.stringify(await res.json()));
+    if (chat && gameId && gameObj && whoIm) {
+      const tempGameObj = gameObj;
+      tempGameObj["textChats"].push({
+        from: whoIm,
+        message: chat,
+      });
+      writeGameData(gameId, tempGameObj);
+    }
   };
 
   return (
@@ -120,10 +125,9 @@ export const GamePageComp = () => {
             >
               {gameObj &&
                 gameObj["textChats"] &&
-                gameObj["textChats"].map((chat,index) => {
-                  if(index===0)
-                  return null
-                  
+                gameObj["textChats"].map((chat, index) => {
+                  if (index === 0) return null;
+
                   let username = null;
                   if (chat["from"] === whoIm) {
                     if (whoIm === "challenger") {

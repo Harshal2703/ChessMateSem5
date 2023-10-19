@@ -51,16 +51,25 @@ export const GamePageComp = () => {
   }, []);
 
   const abortGame = async () => {
-    const res = await fetch("/api/game/abortGame", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ gameId, abortedBy: whoIm }),
-    });
-    const data = JSON.parse(JSON.stringify(await res.json()));
-    if (res.status === 200) {
-      router.push("/");
+    if (gameObj && gameId && !gameObj["gameOn"]) {
+      const res = await fetch("/api/game/abortGame", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          challengerInfo: gameObj.challengerInfo,
+          acceptorInfo: gameObj.acceptorInfo,
+        }),
+      });
+      const data = JSON.parse(JSON.stringify(await res.json()));
+      if (res.status === 200) {
+        const tempGameObj = gameObj;
+        tempGameObj["aborted"] = true;
+        tempGameObj["abortedBy"] = whoIm;
+        tempGameObj["gameOver"] = true;
+        writeGameData(gameId, tempGameObj);
+      }
     }
   };
 

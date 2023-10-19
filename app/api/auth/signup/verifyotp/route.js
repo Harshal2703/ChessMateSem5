@@ -44,7 +44,8 @@ export async function POST(req) {
                     "profilePicUrl": null,
                     "friends":[],
                     "games-history":[],
-                    "active-game":[],
+                    "active-game":null,
+                    "challenges" : []
                 })
                 if (ack.acknowledged && ack2.acknowledged) {
                     mongoClient.close()

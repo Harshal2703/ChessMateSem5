@@ -25,14 +25,17 @@ export const MainPageComp = () => {
         res
           .json()
           .then(({ data }) => {
+            if (data && data["active-game"]) {
+              router.push("/game");
+            }
             setUserDataFromServer(data);
           })
           .catch((err) => {
-            router.redirect("/signin");
+            router.push("/signin");
           });
       })
       .catch((err) => {
-        router.redirect("/signin");
+        router.push("/signin");
       });
   }, []);
 
@@ -184,6 +187,7 @@ export const MainPageComp = () => {
             )}
             {messagesUi && (
               <Messages
+                router={router}
                 setBoardUi={setBoardUi}
                 setFriendUi={setFriendUi}
                 setMessagesUi={setMessagesUi}

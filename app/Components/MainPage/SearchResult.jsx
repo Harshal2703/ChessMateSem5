@@ -18,21 +18,7 @@ export const SearchResult = ({ info, toast }) => {
     }
   };
 
-  const sendChallenge = async () => {
-    const res = await fetch("/api/sendChallenge", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ opponentInfo: info }),
-      });
-      const data = JSON.parse(JSON.stringify(await res.json()));
-      if (res.status === 200) {
-        toast("request sent");
-      }else{
-          toast(data.message)
-      }
-  };
+
   return (
     <div className="h-[15%] flex space-x-4 m-1 items-center">
       <Image
@@ -51,13 +37,7 @@ export const SearchResult = ({ info, toast }) => {
         className="bg-white text-black font-bold text-lg rounded-full px-3 py-1"
       >
         Add Friend
-      </button>
-      <button
-        onClick={sendChallenge}
-        className="bg-white text-black font-bold text-lg rounded-full px-3 py-1"
-      >
-        Send Challenge
-      </button>
+      </button>   
     </div>
   );
 };

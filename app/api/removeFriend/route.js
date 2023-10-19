@@ -30,5 +30,5 @@ export async function POST(req) {
         }
     }
     mongoClient.close()
-    return NextResponse.json('failed to remove', { status: 200 })
+    return NextResponse.json('failed to remove', { status: 400 })
 }

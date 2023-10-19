@@ -24,20 +24,36 @@ export const Friends = ({ setBoardUi, setFriendUi, setMessagesUi }) => {
     setFriends(temp);
   };
 
-  const handleRemoveFriend = async (friend)=>{
+  const handleRemoveFriend = async (friend) => {
     const res = await fetch("/api/removeFriend", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(friend),
-      });
-      const data = JSON.parse(JSON.stringify(await res.json()));
-      if (res.status === 200) {
-        toast("removed successfully");
-        handleRefresh();
-      }
-  }
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(friend),
+    });
+    const data = JSON.parse(JSON.stringify(await res.json()));
+    if (res.status === 200) {
+      toast("removed successfully");
+      handleRefresh();
+    }
+  };
+
+  const sendChallenge = async (opponentInfo) => {
+    const res = await fetch("/api/sendChallenge", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ opponentInfo }),
+    });
+    const data = JSON.parse(JSON.stringify(await res.json()));
+    if (res.status === 200) {
+      toast("request sent");
+    } else {
+      toast(data.message);
+    }
+  };
   return (
     <div id="messages" className="max-h-[97vh]">
       <div id="head" className="flex justify-between p-3 sticky top-0">
@@ -65,9 +81,7 @@ export const Friends = ({ setBoardUi, setFriendUi, setMessagesUi }) => {
       </div>
       <div id="body" className=" p-3 max-h-[86vh] overflow-auto">
         <h1>
-          {friends &&
-            friends.length === 0 &&
-            "Friends Details appears here"}
+          {friends && friends.length === 0 && "Friends Details appears here"}
         </h1>
         {friends &&
           friends.map((friend) => {
@@ -94,12 +108,17 @@ export const Friends = ({ setBoardUi, setFriendUi, setMessagesUi }) => {
                 </div>
                 <div className=" text-white text-left font-bold space-x-4 flex items-center">
                   <button
+                    onClick={() => {
+                      sendChallenge(friend);
+                    }}
                     className="bg-white text-black px-3 py-1 rounded-full"
                   >
                     Send Challenge
                   </button>
                   <button
-                  onClick={()=>{handleRemoveFriend(friend)}}
+                    onClick={() => {
+                      handleRemoveFriend(friend);
+                    }}
                     className="bg-white text-black px-3 py-1 rounded-full"
                   >
                     Remove

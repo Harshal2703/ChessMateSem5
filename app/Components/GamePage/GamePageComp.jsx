@@ -4,11 +4,11 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { v4 as uuidv4 } from "uuid";
 import {} from "../../../firbaseConfig";
 import { getDatabase, ref, set, onValue } from "firebase/database";
+
+let AgoraRTC_N4190 = null;
 
 export const GamePageComp = () => {
   const [gameId, setGameId] = useState(null);
@@ -16,12 +16,14 @@ export const GamePageComp = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [whoIm, setWhoIm] = useState(null);
   const [chat, setChat] = useState(null);
-  const [drawOffered, setDrawOffered] = useState(false);
-  const [drawResponse, setDrawResponse] = useState(false);
   const [positionFenStr, setPositionFenStr] = useState(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
   );
   const [gameOver, setGameOver] = useState(false);
+  const [clientObj, setClientObj] = useState(null);
+  const [localStream, setLocalStream] = useState(null);
+  const [opponentVideo, setOpponentVideo] = useState(null);
+  const [opponentAudio, setOpponentAudio] = useState(null);
   const chess = new Chess();
 
   async function handleOfferDraw() {
@@ -32,7 +34,7 @@ export const GamePageComp = () => {
 
   async function handleDrawResponse(acc, rej) {
     if (acc) {
-      handleGameOver('draw')
+      handleGameOver("draw");
     }
     if (rej) {
       writeGameData(gameId, "noone", "/drawOfferedFrom");
@@ -127,6 +129,7 @@ export const GamePageComp = () => {
 
   const router = useRouter();
   useEffect(() => {
+    AgoraRTC_N4190 = require("../../AgoraRTC_N-4.19.0");
     fetch("/api/getInfo")
       .then((res) => {
         res
@@ -143,7 +146,7 @@ export const GamePageComp = () => {
               if (rtdata["gameOver"]) {
                 setGameOver(true);
               }
-              
+
               if (rtdata["gameOn"] && rtdata["latestMove"]) {
                 setPositionFenStr(rtdata["latestMove"]["fen"]);
               }
@@ -358,6 +361,125 @@ export const GamePageComp = () => {
     }
   };
 
+  const handleGetAgoraTokenAndJoinRoom = async () => {
+    if (userInfo && gameObj) {
+      const res = await fetch("/api/getAgoraToken", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userInfo["_id"],
+          channelName: gameObj["gameId"],
+        }),
+      });
+      const data = JSON.parse(JSON.stringify(await res.json()));
+      if (res.status === 200) {
+        const token = data["token"];
+        let localTracks = [];
+        const APP_ID = "98c5588fc2e0418d92c681bfebe81ac4";
+        const client = AgoraRTC_N4190.createClient({
+          mode: "rtc",
+          codec: "vp8",
+        });
+
+        setClientObj(client);
+        const handleUserJoined = async (user, mediaType) => {
+          await client.subscribe(user, mediaType);
+          if (mediaType === "video") {
+            user.videoTrack.play(`videoOppo`);
+            setOpponentVideo(user.videoTrack);
+          }
+          if (mediaType === "audio") {
+            user.audioTrack.play();
+            setOpponentAudio(user.audioTrack);
+          }
+        };
+        const handleUserLeft = async (user) => {
+          console.log("opponent left video chat");
+        };
+
+        client.on("user-published", handleUserJoined);
+        client.on("user-left", handleUserLeft);
+        await client.join(APP_ID, gameObj["gameId"], token, userInfo["_id"]);
+        localTracks = await AgoraRTC_N4190.createMicrophoneAndCameraTracks();
+        setLocalStream(localTracks);
+        localTracks[1].play(`videoMe`);
+        await client.publish([localTracks[0], localTracks[1]]);
+      }
+    }
+  };
+
+  const leaveAndRemoveLocalStream = async () => {
+    if (localStream && clientObj) {
+      for (let i = 0; localStream.length > i; i++) {
+        localStream[i].stop();
+        localStream[i].close();
+      }
+      await clientObj.leave();
+      setLocalStream(null);
+      setClientObj(null);
+      setOpponentAudio(null);
+      setOpponentVideo(null);
+    }
+  };
+
+  const handleToggleCamera = async (e) => {
+    if (localStream) {
+      if (localStream[1].muted) {
+        await localStream[1].setMuted(false);
+        e.target.innerText = "Camera on";
+        e.target.style.backgroundColor = "cadetblue";
+      } else {
+        await localStream[1].setMuted(true);
+        e.target.innerText = "Camera off";
+        e.target.style.backgroundColor = "#EE4B2B";
+      }
+    }
+  };
+
+  let handleToggleMic = async (e) => {
+    if (localStream) {
+      if (localStream[0].muted) {
+        await localStream[0].setMuted(false);
+        e.target.innerText = "Mic on";
+        e.target.style.backgroundColor = "cadetblue";
+      } else {
+        await localStream[0].setMuted(true);
+        e.target.innerText = "Mic off";
+        e.target.style.backgroundColor = "#EE4B2B";
+      }
+    }
+  };
+
+  const handleMuteVideoOpponent = async (e) => {
+    if (opponentVideo) {
+      if (opponentVideo["isPlaying"]) {
+        await opponentVideo.stop();
+        e.target.innerText = "Camera off";
+        e.target.style.backgroundColor = "cadetblue";
+      } else {
+        await opponentVideo.play("videoOppo");
+        e.target.innerText = "Camera on";
+        e.target.style.backgroundColor = "#EE4B2B";
+      }
+    }
+  };
+
+  const handleMuteAudioOpponent = async (e) => {
+    if (opponentAudio) {
+      if (opponentAudio["isPlaying"]) {
+        await opponentAudio.stop();
+        e.target.innerText = "Mic off";
+        e.target.style.backgroundColor = "cadetblue";
+      } else {
+        await opponentAudio.play();
+        e.target.innerText = "Mic on";
+        e.target.style.backgroundColor = "#EE4B2B";
+      }
+    }
+  };
+
   return (
     gameId &&
     gameObj && (
@@ -445,23 +567,35 @@ export const GamePageComp = () => {
             </div>
             <div id="c2" className=" flex flex-col space-y-3">
               {gameObj &&
-                gameObj["drawOfferedFrom"] !== 'noone' &&
-                gameObj["drawOfferedFrom"] !== whoIm  && (
+                gameObj["drawOfferedFrom"] !== "noone" &&
+                gameObj["drawOfferedFrom"] !== whoIm && (
                   <div className=" flex flex-col">
                     <span className=" text-left">Draw Offered</span>
                     <div className=" flex justify-between">
-                      <button onClick={()=>{handleDrawResponse(true,false)}} id="acc" className=" text-center border px-2 py-1 font-bold text-xl">
+                      <button
+                        onClick={() => {
+                          handleDrawResponse(true, false);
+                        }}
+                        id="acc"
+                        className=" text-center border px-2 py-1 font-bold text-xl"
+                      >
                         Accept
                       </button>
-                      <button onClick={()=>{handleDrawResponse(false,true)}} id="acc" className=" text-center border px-2 py-1 font-bold text-xl">
+                      <button
+                        onClick={() => {
+                          handleDrawResponse(false, true);
+                        }}
+                        id="acc"
+                        className=" text-center border px-2 py-1 font-bold text-xl"
+                      >
                         Reject
                       </button>
                     </div>
                   </div>
                 )}
               {gameObj &&
-                gameObj["drawOfferedFrom"] !== 'noone' &&
-                gameObj["drawOfferedFrom"] === whoIm  &&  (
+                gameObj["drawOfferedFrom"] !== "noone" &&
+                gameObj["drawOfferedFrom"] === whoIm && (
                   <span>Draw request sent waiting for response</span>
                 )}
               {gameObj &&
@@ -667,8 +801,8 @@ export const GamePageComp = () => {
             id="communications"
             className=" bg-black bg-opacity-25 border max-h-screen my-4 w-[32%] m-1"
           >
-            <h1>Communications</h1>
-            <div id="textChats" className="h-[50%]">
+            <h1 className=" h-[5%]">Communications</h1>
+            <div id="textChats" className="h-[30%]">
               <div id="input" className="h-[10%]">
                 <input
                   onChange={(e) => {
@@ -677,11 +811,16 @@ export const GamePageComp = () => {
                   type="text"
                   className=" bg-black text-white p-1 border m-1 w-[80%]"
                 />
-                <button onClick={sendChat}>Send</button>
+                <button
+                  onClick={sendChat}
+                  className=" m-1 border px-2 py-1 font-bold text-md"
+                >
+                  Send
+                </button>
               </div>
               <div
                 id="displayChat"
-                className=" h-[90%] overflow-y-scroll overflow-x-hidden"
+                className=" h-[90%] overflow-y-scroll overflow-x-hidden p-2"
               >
                 {gameObj &&
                   gameObj["textChats"] &&
@@ -703,12 +842,96 @@ export const GamePageComp = () => {
                       }
                     }
                     return (
-                      <div key={index} className=" flex space-x-2">
-                        <div id="name">{username}</div>
-                        <div id="name">{chat["message"]}</div>
+                      <div key={index} className=" flex space-x-2 ">
+                        <div id="name" className=" font-bold text-sm">
+                          {username + " :"}
+                        </div>
+                        <div id="name" className=" font-bold text-sm">
+                          {chat["message"]}
+                        </div>
                       </div>
                     );
                   })}
+              </div>
+            </div>
+            <div id="videoChat" className="h-[65%] p-3 flex flex-col space-y-2">
+              <div id="me" className=" border h-[48%] w-full flex">
+                <div className="w-[70%] h-full">
+                  <h1 className=" text-lg font-bold h-[17%] p-1">Me</h1>
+                  <div
+                    id="videoMe"
+                    className=" bg-black h-[83%] w-full  border"
+                  ></div>
+                </div>
+                <div
+                  id="videoContorlsMe"
+                  className=" w-[30%] flex flex-col p-1 mt-auto"
+                >
+                  <button
+                    onClick={handleGetAgoraTokenAndJoinRoom}
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="joinMe"
+                  >
+                    Join
+                  </button>
+                  <button
+                    onClick={leaveAndRemoveLocalStream}
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="leaveMe"
+                  >
+                    Leave
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      handleToggleCamera(e);
+                    }}
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="cameraToggleMe"
+                  >
+                    Camera on
+                  </button>
+                  <button
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="micToggleMe"
+                    onClick={(e) => {
+                      handleToggleMic(e);
+                    }}
+                  >
+                    Mic on
+                  </button>
+                </div>
+              </div>
+              <div id="oppo" className=" border h-[48%] w-full flex">
+                <div className="w-[70%] h-full">
+                  <h1 className=" text-lg font-bold h-[17%] p-1">Opponent</h1>
+                  <div
+                    id="videoOppo"
+                    className=" bg-black h-[83%] w-full  border"
+                  ></div>
+                </div>
+                <div
+                  id="videoContorlsOppo"
+                  className=" w-[30%] flex flex-col p-1 mt-auto"
+                >
+                  <button
+                    onClick={(e) => {
+                      handleMuteVideoOpponent(e);
+                    }}
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="cameraToggleOppo"
+                  >
+                    Camera on
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      handleMuteAudioOpponent(e);
+                    }}
+                    className=" border px-2 py-1  font-bold text-lg"
+                    id="micToggleOppo"
+                  >
+                    Mic on
+                  </button>
+                </div>
               </div>
             </div>
           </div>

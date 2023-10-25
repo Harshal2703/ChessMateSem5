@@ -7,7 +7,7 @@ export default function Page() {
         backgroundPosition: '0 0, 25px 25px',
         backgroundSize: '50px 50px',
         backgroundColor: '#000000',
-      };
+    };
     return (
         <div style={inlineStyles} className='h-screen'>
             <GamePageComp />

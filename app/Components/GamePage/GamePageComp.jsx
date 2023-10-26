@@ -7,6 +7,12 @@ import { useRouter } from "next/navigation";
 import "react-toastify/dist/ReactToastify.css";
 import {} from "../../../firbaseConfig";
 import { getDatabase, ref, set, onValue } from "firebase/database";
+import {
+  BsFillCameraVideoFill,
+  BsFillCameraVideoOffFill,
+  BsFillMicFill,
+  BsFillMicMuteFill,
+} from "react-icons/bs";
 
 let AgoraRTC_N4190 = null;
 
@@ -24,6 +30,10 @@ export const GamePageComp = () => {
   const [localStream, setLocalStream] = useState(null);
   const [opponentVideo, setOpponentVideo] = useState(null);
   const [opponentAudio, setOpponentAudio] = useState(null);
+  const [oppoCamera, setOppoCamera] = useState(false);
+  const [oppoMic, setOppoMic] = useState(false);
+  const [myCamera, setMyCamera] = useState(false);
+  const [myMic, setMyMic] = useState(false);
   const chess = new Chess();
 
   async function handleOfferDraw() {
@@ -389,14 +399,19 @@ export const GamePageComp = () => {
           if (mediaType === "video") {
             user.videoTrack.play(`videoOppo`);
             setOpponentVideo(user.videoTrack);
+            setOppoCamera(true);
           }
           if (mediaType === "audio") {
             user.audioTrack.play();
             setOpponentAudio(user.audioTrack);
+            setOppoMic(true);
           }
         };
         const handleUserLeft = async (user) => {
-          console.log("opponent left video chat");
+          setOpponentVideo(null);
+          setOpponentAudio(null);
+          setOppoCamera(false);
+          setOppoMic(false);
         };
 
         client.on("user-published", handleUserJoined);
@@ -406,6 +421,8 @@ export const GamePageComp = () => {
         setLocalStream(localTracks);
         localTracks[1].play(`videoMe`);
         await client.publish([localTracks[0], localTracks[1]]);
+        setMyCamera(true);
+        setMyMic(true);
       }
     }
   };
@@ -421,6 +438,10 @@ export const GamePageComp = () => {
       setClientObj(null);
       setOpponentAudio(null);
       setOpponentVideo(null);
+      setMyCamera(false);
+      setOppoCamera(false);
+      setMyMic(false);
+      setOppoMic(false);
     }
   };
 
@@ -428,12 +449,10 @@ export const GamePageComp = () => {
     if (localStream) {
       if (localStream[1].muted) {
         await localStream[1].setMuted(false);
-        e.target.innerText = "Camera on";
-        e.target.style.backgroundColor = "cadetblue";
+        setMyCamera(true);
       } else {
         await localStream[1].setMuted(true);
-        e.target.innerText = "Camera off";
-        e.target.style.backgroundColor = "#EE4B2B";
+        setMyCamera(false);
       }
     }
   };
@@ -442,12 +461,10 @@ export const GamePageComp = () => {
     if (localStream) {
       if (localStream[0].muted) {
         await localStream[0].setMuted(false);
-        e.target.innerText = "Mic on";
-        e.target.style.backgroundColor = "cadetblue";
+        setMyMic(true);
       } else {
         await localStream[0].setMuted(true);
-        e.target.innerText = "Mic off";
-        e.target.style.backgroundColor = "#EE4B2B";
+        setMyMic(false);
       }
     }
   };
@@ -456,12 +473,10 @@ export const GamePageComp = () => {
     if (opponentVideo) {
       if (opponentVideo["isPlaying"]) {
         await opponentVideo.stop();
-        e.target.innerText = "Camera off";
-        e.target.style.backgroundColor = "cadetblue";
+        setOppoCamera(false);
       } else {
         await opponentVideo.play("videoOppo");
-        e.target.innerText = "Camera on";
-        e.target.style.backgroundColor = "#EE4B2B";
+        setOppoCamera(true);
       }
     }
   };
@@ -470,12 +485,10 @@ export const GamePageComp = () => {
     if (opponentAudio) {
       if (opponentAudio["isPlaying"]) {
         await opponentAudio.stop();
-        e.target.innerText = "Mic off";
-        e.target.style.backgroundColor = "cadetblue";
+        setOppoMic(false);
       } else {
         await opponentAudio.play();
-        e.target.innerText = "Mic on";
-        e.target.style.backgroundColor = "#EE4B2B";
+        setOppoMic(true);
       }
     }
   };
@@ -799,11 +812,51 @@ export const GamePageComp = () => {
           </div>
           <div
             id="communications"
-            className=" bg-black bg-opacity-25 border max-h-screen my-4 w-[32%] m-1"
+            className=" w-[32%] h-[95vh] my-5 mx-1 border p-3"
           >
-            <h1 className=" h-[5%]">Communications</h1>
-            <div id="textChats" className="h-[30%]">
-              <div id="input" className="h-[10%]">
+            <div id="oppo" className=" flex border w-full h-[30%]">
+              <div
+                id="videoOppo"
+                className=" bg-black h-full w-[80%] border-r"
+              ></div>
+              <div id="oppoControls" className="flex flex-col w-[20%]">
+                <span className=" text-center font-bold block h-[20%]">
+                  Opponent
+                </span>
+                <div
+                  id="videoControlsBtns"
+                  className=" h-[80%] flex flex-col items-center w-full justify-center space-y-2"
+                >
+                  <button
+                    onClick={(e) => {
+                      handleMuteVideoOpponent(e);
+                    }}
+                    className=" border p-2  font-bold text-3xl"
+                    id="cameraToggleOppo"
+                  >
+                    {oppoCamera ? (
+                      <BsFillCameraVideoFill />
+                    ) : (
+                      <BsFillCameraVideoOffFill />
+                    )}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      handleMuteAudioOpponent(e);
+                    }}
+                    className=" border p-2  font-bold text-3xl"
+                    id="micToggleOppo"
+                  >
+                    {oppoMic ? <BsFillMicFill /> : <BsFillMicMuteFill />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              id="chats"
+              className=" border flex flex-col space-x-3 w-full h-[40%] p-4"
+            >
+              <div id="input" className="h-[20%] flex">
                 <input
                   onChange={(e) => {
                     setChat(e.target.value);
@@ -820,7 +873,7 @@ export const GamePageComp = () => {
               </div>
               <div
                 id="displayChat"
-                className=" h-[90%] overflow-y-scroll overflow-x-hidden p-2"
+                className=" h-[80%] overflow-y-scroll overflow-x-hidden"
               >
                 {gameObj &&
                   gameObj["textChats"] &&
@@ -854,29 +907,27 @@ export const GamePageComp = () => {
                   })}
               </div>
             </div>
-            <div id="videoChat" className="h-[65%] p-3 flex flex-col space-y-2">
-              <div id="me" className=" border h-[48%] w-full flex">
-                <div className="w-[70%] h-full">
-                  <h1 className=" text-lg font-bold h-[17%] p-1">Me</h1>
-                  <div
-                    id="videoMe"
-                    className=" bg-black h-[83%] w-full  border"
-                  ></div>
-                </div>
+            <div id="me" className=" flex border w-full h-[30%]">
+              <div
+                id="videoMe"
+                className=" bg-black h-full w-[80%] border-r"
+              ></div>
+              <div id="meControls" className="flex flex-col w-[20%]">
+                <span className=" text-center font-bold block h-[15%]">Me</span>
                 <div
-                  id="videoContorlsMe"
-                  className=" w-[30%] flex flex-col p-1 mt-auto"
+                  id="videoControlsBtns"
+                  className=" h-[80%] flex flex-col items-center w-full justify-center space-y-1"
                 >
                   <button
                     onClick={handleGetAgoraTokenAndJoinRoom}
-                    className=" border px-2 py-1  font-bold text-lg"
+                    className=" border px-2 py-1  font-bold text-sm"
                     id="joinMe"
                   >
                     Join
                   </button>
                   <button
                     onClick={leaveAndRemoveLocalStream}
-                    className=" border px-2 py-1  font-bold text-lg"
+                    className=" border px-2 py-1  font-bold text-sm"
                     id="leaveMe"
                   >
                     Leave
@@ -885,51 +936,23 @@ export const GamePageComp = () => {
                     onClick={(e) => {
                       handleToggleCamera(e);
                     }}
-                    className=" border px-2 py-1  font-bold text-lg"
+                    className=" border px-3 py-2 font-bold text-xl"
                     id="cameraToggleMe"
                   >
-                    Camera on
+                    {myCamera ? (
+                      <BsFillCameraVideoFill />
+                    ) : (
+                      <BsFillCameraVideoOffFill />
+                    )}
                   </button>
                   <button
-                    className=" border px-2 py-1  font-bold text-lg"
+                    className=" border px-3 py-2 font-bold text-xl"
                     id="micToggleMe"
                     onClick={(e) => {
                       handleToggleMic(e);
                     }}
                   >
-                    Mic on
-                  </button>
-                </div>
-              </div>
-              <div id="oppo" className=" border h-[48%] w-full flex">
-                <div className="w-[70%] h-full">
-                  <h1 className=" text-lg font-bold h-[17%] p-1">Opponent</h1>
-                  <div
-                    id="videoOppo"
-                    className=" bg-black h-[83%] w-full  border"
-                  ></div>
-                </div>
-                <div
-                  id="videoContorlsOppo"
-                  className=" w-[30%] flex flex-col p-1 mt-auto"
-                >
-                  <button
-                    onClick={(e) => {
-                      handleMuteVideoOpponent(e);
-                    }}
-                    className=" border px-2 py-1  font-bold text-lg"
-                    id="cameraToggleOppo"
-                  >
-                    Camera on
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      handleMuteAudioOpponent(e);
-                    }}
-                    className=" border px-2 py-1  font-bold text-lg"
-                    id="micToggleOppo"
-                  >
-                    Mic on
+                    {myMic ? <BsFillMicFill /> : <BsFillMicMuteFill />}
                   </button>
                 </div>
               </div>

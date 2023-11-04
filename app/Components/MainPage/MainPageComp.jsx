@@ -18,6 +18,8 @@ export const MainPageComp = () => {
   const [messagesUi, setMessagesUi] = useState(false);
   const [err, setErr] = useState(null);
   const router = useRouter();
+  const [searchingOn , setSearchingOn] = useState(false)
+
 
   useEffect(() => {
     fetch("/api/getInfo")
@@ -41,6 +43,7 @@ export const MainPageComp = () => {
 
   const handlePlayerSearch = async () => {
     if (searchData) {
+      setSearchingOn(true)
       const res = await fetch("/api/search", {
         method: "POST",
         headers: {
@@ -48,6 +51,7 @@ export const MainPageComp = () => {
         },
         body: JSON.stringify({ toSearch: searchData }),
       });
+      setSearchingOn(false)
       const data = JSON.parse(JSON.stringify(await res.json()));
       if (res.status === 200) {
         setSearchResult(data.searchResult);
@@ -273,11 +277,11 @@ export const MainPageComp = () => {
                     </button>
                   )}
                   <button
-                    onClick={handlePlayerSearch}
+                    onClick={()=>{!searchingOn && handlePlayerSearch()}}
                     type="submit"
                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
-                    Search
+                    {searchingOn?'wait...':'Search'}
                   </button>
                 </div>
               </div>

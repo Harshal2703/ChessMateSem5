@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
                 </div>
             </div>
             <div className="text-[60px] font-bold w-[50%] text-center">
-                {"World's First Online Chess Platform with Video Chatting Feature"}
+                {"Online Chess Platform with Video Chatting"}
             </div>
         </div>
     </>
